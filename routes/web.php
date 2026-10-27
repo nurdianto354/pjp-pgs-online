@@ -8,6 +8,7 @@ use App\Http\Controllers\BimbinganKonseling\LaporanDesaController;
 use App\Http\Controllers\BimbinganKonseling\LaporanKelompokController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KegiatanController;
+use App\Http\Controllers\Kelompok\MasterData\KegiatanController as KelompokKegiatanController;
 use App\Http\Controllers\Kelompok\MasterData\KelompokController;
 use App\Http\Controllers\Kelompok\MasterData\LokasiController;
 use App\Http\Controllers\Kelompok\MasterData\PengajianController;
@@ -186,15 +187,20 @@ Route::group(['middleware' => 'auth'], function() {
 
     Route::prefix('kelompok')->group(function () {
         Route::prefix('master-data')->group(function () {
-            Route::controller(KelompokController::class)->prefix('kelompok')->group(function () {
-                Route::get('index', 'index')->name('kelompok.master_data.kelompok.index');
-                Route::post('create', 'create')->name('kelompok.master_data.kelompok.create');
-                Route::post('delete/{id}', 'destroy')->name('kelompok.master_data.kelompok.destroy');
+            Route::controller(KelompokKegiatanController::class)->prefix('kegiatan')->group(function () {
+                Route::get('index', 'index')->name('kelompok.master_data.kegiatan.index');
+                Route::post('create', 'create')->name('kelompok.master_data.kegiatan.create');
+                Route::post('toggle-status/{id}', 'toggleStatus')->name('kelompok.master_data.kegiatan.toggle_status');
             });
             Route::controller(LokasiController::class)->prefix('lokasi')->group(function () {
                 Route::get('index', 'index')->name('kelompok.master_data.lokasi.index');
                 Route::post('create', 'create')->name('kelompok.master_data.lokasi.create');
-                Route::post('delete/{id}', 'destroy')->name('kelompok.master_data.lokasi.destroy');
+                Route::post('toggle-status/{id}', 'toggleStatus')->name('kelompok.master_data.lokasi.toggle_status');
+            });
+            Route::controller(KelompokController::class)->prefix('kelompok')->group(function () {
+                Route::get('index', 'index')->name('kelompok.master_data.kelompok.index');
+                Route::post('create', 'create')->name('kelompok.master_data.kelompok.create');
+                Route::post('delete/{id}', 'destroy')->name('kelompok.master_data.kelompok.destroy');
             });
             Route::controller(PengajianController::class)->prefix('pengajian')->group(function () {
                 Route::get('index', 'index')->name('kelompok.master_data.pengajian.index');

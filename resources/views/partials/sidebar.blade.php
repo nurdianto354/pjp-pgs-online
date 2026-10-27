@@ -228,21 +228,15 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{{ route('kelompok.master_data.kelompok.index') }}" class="nav-link  {{ setActive('kelompok/master-data/kelompok/*') }}">
+                                    <a href="{{ route('kelompok.master_data.kegiatan.index') }}" class="nav-link  {{ setActive('kelompok/master-data/kegiatan/*') }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>kelompok</p>
+                                        <p>Kegiatan</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ route('kelompok.master_data.lokasi.index') }}" class="nav-link  {{ setActive('kelompok/master-data/lokasi/*') }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Lokasi</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('kelompok.master_data.pengajian.index') }}" class="nav-link  {{ setActive('kelompok/master-data/pengajian/*') }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Pengajian</p>
                                     </a>
                                 </li>
                             </ul>
