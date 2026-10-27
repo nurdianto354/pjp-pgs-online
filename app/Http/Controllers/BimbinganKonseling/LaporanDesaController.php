@@ -251,7 +251,7 @@ class LaporanDesaController extends Controller
                         $value = $listKategori[$data->kategori];
                         $sheet->setCellValueByColumnAndRow($col, $row, $value);
                     } else if ($field['field'] == "realisasi") {
-                        $value = $listKategori[$data->realisasi];
+                        $value = $listRealisasi[$data->realisasi] ?? '-';
                         $sheet->setCellValueByColumnAndRow($col, $row, $value);
                     } else {
                         $sheet->setCellValueByColumnAndRow($col, $row, $data[$field['field']]);

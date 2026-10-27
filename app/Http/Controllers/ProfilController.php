@@ -27,7 +27,7 @@ class ProfilController extends Controller
 
     public function update($id, $view)
     {
-        $data = User::findOrFail($id);
+        $data = Auth::user();
 
         if ($view == 'data') {
             $title = 'Perbarui Data Pribadi';
@@ -48,14 +48,14 @@ class ProfilController extends Controller
             $title  = "mengganti password";
         }
 
+        $data = Auth::user();
+
         DB::beginTransaction();
         try {
-            $data = User::find($request->id);
-
             if ($request->view == 'data') {
                 $this->validate($request, [
                     'username'  => 'required',
-                    'email'     => 'required|email',
+                    'email'     => 'required|email|unique:users,email,' . $data->id,
                     'nama'      => 'required',
                 ]);
 
@@ -67,15 +67,17 @@ class ProfilController extends Controller
             } else {
                 $validator = Validator::make($request->all(), [
                     'current_password' => 'required',
-                    'new_password' => 'required|min:8|confirmed',
+                    'new_password'     => 'required|min:8|confirmed',
                 ]);
 
                 if ($validator->fails()) {
+                    DB::rollBack();
                     return back()->with('error', 'Gagal password baru dengan password confirm tidak sama');
                 }
 
-                if (!Hash::check($request->current_password, Auth::user()->password)) {
-                    return back()->with('error', 'Gagal ' . " password lama salah.");
+                if (!Hash::check($request->current_password, $data->password)) {
+                    DB::rollBack();
+                    return back()->with('error', 'Gagal password lama salah.');
                 }
 
                 $data->password = Hash::make($request->new_password);
@@ -87,10 +89,13 @@ class ProfilController extends Controller
             $message = $status . " " . $title;
 
             return redirect()->route('profil.index')->with(['success' => $message]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            throw $e;
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            return back()->with('error', 'Gagal ' . " " . $title);
+            return back()->with('error', 'Gagal ' . $title);
         }
     }
 }

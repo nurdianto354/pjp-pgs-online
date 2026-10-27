@@ -170,10 +170,9 @@ class MuridController extends Controller
             }
 
             // Ambil list divisi berdasarkan ID yang ditemukan
-            $listDivisi = Divisi::whereIn('id', $divisiIds)
+            $listDivisi = Divisi::select('id', 'nama')->whereIn('id', $divisiIds)
                 ->where('status', true)
-                ->pluck('nama', 'id')
-                ->toArray();
+                ->get();
         }
 
         $style_border = [
@@ -215,7 +214,7 @@ class MuridController extends Controller
             ['field' => 'jenis_kelamin', 'name' => 'Jenis Kelamin', 'style' => 'left'],
             ['field' => 'kelas_id', 'name' => 'Kelas', 'style' => 'left'],
             ['field' => 'tempat_lahir', 'name' => 'Tempat Lahir', 'style' => 'left'],
-            ['field' => 'tanggal_lahir', 'name' => 'Tempat Lahir', 'style' => 'center'],
+            ['field' => 'tanggal_lahir', 'name' => 'Tanggal Lahir', 'style' => 'center'],
             ['field' => 'alamat', 'name' => 'Alamat', 'style' => 'left'],
             ['field' => 'no_telp', 'name' => 'No. Telp', 'style' => 'left'],
         ];
@@ -275,7 +274,7 @@ class MuridController extends Controller
                             $value = $murid[$field['field']] == 1 ? "Laki - laki" : "Perempuan";
                             $sheet->setCellValueExplicitByColumnAndRow($col, $row, (string)$value, DataType::TYPE_STRING);
                         } else if ($field['field'] == 'kelas_id') {
-                            $value = $murid->getKelas->nama;
+                            $value = !empty($murid->getKelas) ? $murid->getKelas->nama : '-';
                             $sheet->setCellValueExplicitByColumnAndRow($col, $row, (string)$value, DataType::TYPE_STRING);
                         } else {
                             $sheet->setCellValueExplicitByColumnAndRow($col, $row, (string)$murid[$field['field']], DataType::TYPE_STRING);

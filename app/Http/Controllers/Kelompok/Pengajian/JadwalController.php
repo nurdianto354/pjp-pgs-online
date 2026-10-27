@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Kelompok\Pengajian;
 
 use App\Http\Controllers\Controller;
+use App\Models\Kelompok\MasterData\Pengajian;
 use Illuminate\Http\Request;
 
 class JadwalController extends Controller

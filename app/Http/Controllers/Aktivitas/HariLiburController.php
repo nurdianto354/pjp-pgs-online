@@ -77,6 +77,7 @@ class HariLiburController extends Controller
         DB::beginTransaction();
         try {
             $tanggal = Carbon::parse($request->tanggal);
+            $timestamp = strtotime($tanggal->format('Y-m-d'));
             $action = "menambahkan";
 
             // Jika id ada, cari data untuk update
@@ -87,7 +88,7 @@ class HariLiburController extends Controller
                 // Jika id tidak ada, cek apakah data sudah ada berdasarkan divisi_id dan tanggal
                 $checkData = HariLibur::where([
                     ['divisi_id', $request->divisi_id],
-                    ['tanggal', $tanggal->format('Y-m-d')] // gunakan format 'Y-m-d' untuk perbandingan tanggal
+                    ['tanggal', $timestamp]
                 ])->first();
 
                 if (isset($checkData) && $checkData->status == true) {
@@ -97,12 +98,15 @@ class HariLiburController extends Controller
                     return back();
                 } else {
                     $data = $checkData ?: new HariLibur(); // Jika data tidak ada, buat objek baru
+                    if (!$checkData) {
+                        $data->created_at = Carbon::now();
+                    }
                 }
             }
 
             // Set data yang diterima dari request
             $data->divisi_id  = $request->divisi_id;
-            $data->tanggal    = strtotime($tanggal);
+            $data->tanggal    = $timestamp;
             $data->hari       = $tanggal->dayOfWeek;
             $data->bulan      = $tanggal->month;
             $data->tahun      = $tanggal->year;

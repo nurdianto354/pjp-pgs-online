@@ -445,7 +445,7 @@ class KurikulumTargetController extends Controller
             $data->updated_at = Carbon::now();
             $data->save();
 
-            for ($col = 1; $col <= $highestColumnIndex-1; $col++) {
+            for ($col = 2; $col <= $highestColumnIndex; $col++) {
                 $row = 6;
 
                 $namaKarakter = $sheetData->getCellByColumnAndRow($col, $row)->getValue();
@@ -455,6 +455,10 @@ class KurikulumTargetController extends Controller
                 $namaSatuan   = $sheetData->getCellByColumnAndRow($col, $row)->getValue();
                 $row++;
                 $target       = $sheetData->getCellByColumnAndRow($col, $row)->getValue();
+
+                if (empty($namaKarakter) && empty($namaMateri) && empty($namaSatuan)) {
+                    continue;
+                }
 
                 if (empty($namaKarakter) || empty($namaMateri) || empty($namaSatuan)) {
                     DB::rollback();

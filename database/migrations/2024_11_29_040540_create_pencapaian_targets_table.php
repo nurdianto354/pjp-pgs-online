@@ -13,20 +13,22 @@ class CreatePencapaianTargetsTable extends Migration
      */
     public function up()
     {
-        Schema::create('pencapaian_target', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('kelas_id');
-            $table->unsignedBigInteger('tahun_id');
-            $table->unsignedBigInteger('murid_id');
-            $table->unsignedBigInteger('kurikulum_target_detail_id');
-            $table->integer('target')->nullable();
-            $table->timestamps();
+        if (!Schema::hasTable('pencapaian_target')) {
+            Schema::create('pencapaian_target', function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('kelas_id');
+                $table->unsignedBigInteger('murid_id');
+                $table->unsignedBigInteger('kurikulum_target_detail_id');
+                $table->integer('target')->nullable();
+                $table->tinyInteger('bulan');
+                $table->bigInteger('tahun');
+                $table->timestamps();
 
-            $table->foreign('kelas_id')->references('id')->on('m_kelas')->onDelete('cascade');
-            $table->foreign('tahun_id')->references('id')->on('m_tahun')->onDelete('cascade');
-            $table->foreign('murid_id')->references('id')->on('murid')->onDelete('cascade');
-            $table->foreign('kurikulum_target_detail_id')->references('id')->on('kurikulum_target_detail')->onDelete('cascade');
-        });
+                $table->foreign('kelas_id')->references('id')->on('m_kelas')->onDelete('cascade');
+                $table->foreign('murid_id')->references('id')->on('murid')->onDelete('cascade');
+                $table->foreign('kurikulum_target_detail_id')->references('id')->on('kurikulum_target_detail')->onDelete('cascade');
+            });
+        }
     }
 
     /**

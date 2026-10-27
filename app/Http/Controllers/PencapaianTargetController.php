@@ -80,13 +80,21 @@ class PencapaianTargetController extends Controller
 
         $listPencapaianTarget = [];
 
-        foreach ($listMurid as $murid) {
-            $datas = PencapaianTarget::select('id', 'kurikulum_target_detail_id', 'target')
-                ->where([['kelas_id', $kelasId], ['murid_id', $murid->id], ['tahun', $tahun], ['bulan', $bulan]])
-                ->get()->toArray();
+        $muridIds = $listMurid->pluck('id')->toArray();
+        if (!empty($muridIds)) {
+            $allPencapaian = PencapaianTarget::select('id', 'murid_id', 'kurikulum_target_detail_id', 'target')
+                ->where('kelas_id', $kelasId)
+                ->whereIn('murid_id', $muridIds)
+                ->where('tahun', $tahun)
+                ->where('bulan', $bulan)
+                ->get();
 
-            foreach ($datas as $data) {
-                $listPencapaianTarget[$murid->id][$data['kurikulum_target_detail_id']] = $data;
+            foreach ($allPencapaian as $item) {
+                $listPencapaianTarget[$item->murid_id][$item->kurikulum_target_detail_id] = [
+                    'id'                         => $item->id,
+                    'kurikulum_target_detail_id' => $item->kurikulum_target_detail_id,
+                    'target'                     => $item->target,
+                ];
             }
         }
 
@@ -97,6 +105,7 @@ class PencapaianTargetController extends Controller
     {
         $success = true;
         $message = "Data has been saved successfully";
+        $data    = null;
 
         DB::beginTransaction();
         try {
@@ -112,8 +121,17 @@ class PencapaianTargetController extends Controller
             if ($request->id != null && $request->id != '') {
                 $data = PencapaianTarget::findOrFail($request->id);
             } else {
-                $data = new PencapaianTarget();
-                $data->created_at = Carbon::now();
+                $data = PencapaianTarget::where([
+                    ['kelas_id', $request->kelas_id],
+                    ['murid_id', $request->murid_id],
+                    ['kurikulum_target_detail_id', $request->kurikulum_target_detail_id],
+                    ['bulan', $request->bulan],
+                    ['tahun', $request->tahun],
+                ])->first() ?: new PencapaianTarget();
+
+                if (!$data->exists) {
+                    $data->created_at = Carbon::now();
+                }
             }
 
             $data->kelas_id                   = $request->kelas_id;
@@ -126,11 +144,17 @@ class PencapaianTargetController extends Controller
             $data->save();
 
             DB::commit();
-        } catch (\Exception $e) {
-            $success = false;
-            $message = $e;
-
+        } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollback();
+
+            $success = false;
+            $message = $e->validator->errors()->first();
+        } catch (\Throwable $e) {
+            DB::rollback();
+            Log::error('Error saving pencapaian target: ' . $e->getMessage());
+
+            $success = false;
+            $message = 'Gagal menyimpan data pencapaian target.';
         }
 
         return response()->json([

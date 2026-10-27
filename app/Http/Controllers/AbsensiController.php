@@ -85,13 +85,21 @@ class AbsensiController extends Controller
 
         $datas = [];
 
-        foreach ($listMurid as $murid) {
-            foreach ($listTanggal as $data) {
-                $listAbsensi = Absensi::select('id', 'kehadiran')->where([['murid_id', $murid->id], ['tanggal', $data->tanggal]])->get()->toArray();
+        $muridIds = $listMurid->pluck('id')->toArray();
+        $tanggalTimestamps = $listTanggal->pluck('tanggal')->toArray();
 
-                foreach ($listAbsensi as $dataNew) {
-                    $datas[$murid->id][$data->tanggal] = $dataNew;
-                }
+        if (!empty($muridIds) && !empty($tanggalTimestamps)) {
+            $allAbsensi = Absensi::select('id', 'murid_id', 'tanggal', 'kehadiran')
+                ->where('kelas_id', $kelasId)
+                ->whereIn('murid_id', $muridIds)
+                ->whereIn('tanggal', $tanggalTimestamps)
+                ->get();
+
+            foreach ($allAbsensi as $item) {
+                $datas[$item->murid_id][$item->tanggal] = [
+                    'id'        => $item->id,
+                    'kehadiran' => $item->kehadiran,
+                ];
             }
         }
 
@@ -102,6 +110,7 @@ class AbsensiController extends Controller
     {
         $success = true;
         $message = "Data has been saved successfully";
+        $data    = null;
 
         DB::beginTransaction();
         try {
@@ -115,8 +124,15 @@ class AbsensiController extends Controller
             if ($request->id != null && $request->id != '') {
                 $data = Absensi::findOrFail($request->id);
             } else {
-                $data = new Absensi();
-                $data->created_at = Carbon::now();
+                $data = Absensi::where([
+                    ['kelas_id', $request->kelas_id],
+                    ['murid_id', $request->murid_id],
+                    ['tanggal', $request->tanggal],
+                ])->first() ?: new Absensi();
+
+                if (!$data->exists) {
+                    $data->created_at = Carbon::now();
+                }
             }
 
             $data->kelas_id   = $request->kelas_id;
@@ -133,11 +149,17 @@ class AbsensiController extends Controller
             $data->save();
 
             DB::commit();
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollback();
 
             $success = false;
-            $message = $e;
+            $message = $e->validator->errors()->first();
+        } catch (\Throwable $e) {
+            DB::rollback();
+            Log::error('Error saving absensi: ' . $e->getMessage());
+
+            $success = false;
+            $message = 'Gagal menyimpan data absensi.';
         }
 
         return response()->json([

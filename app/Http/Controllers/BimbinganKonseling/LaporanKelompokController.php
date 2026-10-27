@@ -299,9 +299,11 @@ class LaporanKelompokController extends Controller
         $datas = LaporanKelompok::with('getDivisi', 'getKelas', 'createdBy', 'updatedBy')
             ->where([['tahun', $tahun], ['bulan', $bulan], ['status', true]])->orderBy('kelas_id', 'ASC')->orderBy('created_at', 'ASC')->get();
 
-        $data = ['name' => 'John Doe', 'email' => 'john@example.com'];
-        $pdf = Pdf::loadView('pages.bimbingan_konseling.laporan_kelompok.print_pdf', $data);
+        $namaBulan = isset(Tanggal::listBulan[$bulan]) ? Tanggal::listBulan[$bulan] : ($bulan ?: 'Semua');
+        $filename  = 'Laporan_BK_Kelompok_' . ($tahun ?: 'Semua') . '_' . $namaBulan . '.pdf';
 
-        return $pdf->download('yourfile.pdf');
+        $pdf = Pdf::loadView('pages.bimbingan_konseling.laporan_kelompok.print_pdf', compact('datas', 'tahun', 'bulan', 'namaBulan'));
+
+        return $pdf->download($filename);
     }
 }

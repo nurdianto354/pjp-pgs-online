@@ -95,7 +95,8 @@ class JadwalController extends Controller
                     toast($message, 'error');
                     return back();
                 } else {
-                    $data = $checkData;
+                    $data = $checkData ?: new Jadwal();
+                    $data->created_at = Carbon::now();
                 }
             }
 

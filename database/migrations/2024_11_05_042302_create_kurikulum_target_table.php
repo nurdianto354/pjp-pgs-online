@@ -13,15 +13,15 @@ class CreateKurikulumTargetTable extends Migration
      */
     public function up()
     {
-        Schema::create('kurikulum_target', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('kelas_id');
-            $table->unsignedBigInteger('tahun_id');
-            $table->timestamps();
+        if (!Schema::hasTable('kurikulum_target')) {
+            Schema::create('kurikulum_target', function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('kelas_id');
+                $table->timestamps();
 
-            $table->foreign('kelas_id')->references('id')->on('m_kelas')->onDelete('cascade');
-            $table->foreign('tahun_id')->references('id')->on('m_tahun')->onDelete('cascade');
-        });
+                $table->foreign('kelas_id')->references('id')->on('m_kelas')->onDelete('cascade');
+            });
+        }
     }
 
     /**

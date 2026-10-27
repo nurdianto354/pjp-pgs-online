@@ -27,9 +27,11 @@ class TanggalController extends Controller
     {
         $status = "Berhasil";
         $action = "menambahkan";
-        $title  = "Data Tanggal ".date("d-m-Y", strtotime($request->tanggal));
+        $tanggal = Carbon::parse($request->tanggal);
+        $timestamp = strtotime($tanggal->format('Y-m-d'));
+        $title  = "Data Tanggal ".date("d-m-Y", $timestamp);
 
-        $checkData = Tanggal::where('tanggal', 'LIKE', '%'.strtotime($request->tanggal).'%')
+        $checkData = Tanggal::where('tanggal', $timestamp)
             ->where('id', '!=', $request->id)
             ->first();
 
@@ -51,10 +53,8 @@ class TanggalController extends Controller
                 $data->status     = true;
             }
 
-            $tanggal = Carbon::parse($request->tanggal);
-
-            $data->tanggal    = strtotime($tanggal);
-            $data->hari       = $tanggal->day;
+            $data->tanggal    = $timestamp;
+            $data->hari       = $tanggal->dayOfWeek;
             $data->bulan      = $tanggal->month;
             $data->tahun      = $tanggal->year;
             $data->updated_at = Carbon::now();

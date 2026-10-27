@@ -176,6 +176,19 @@ class   LaporanLaporanDaerahController extends Controller
 
             $rowAwal = $row;
 
+            $jadwal = Jadwal::where([['divisi_id', $request['divisi_id']], ['status', true]])
+                ->pluck('hari');
+
+            $hariLibur = HariLibur::where([['divisi_id', $request['divisi_id']], ['status', true]])
+                ->pluck('tanggal');
+
+            $listTanggal = Tanggal::where([['tahun', $request['tahun']], ['bulan', $request['bulan']], ['status', true]])
+                ->whereIn('hari', $jadwal)
+                ->whereNotIn('tanggal', $hariLibur)
+                ->orderBy('tanggal', 'ASC')->pluck('tanggal')->toArray();
+
+            $total = count($listTanggal);
+
             $listMurid = Murid::with('getKelas')
                 ->where([['kelas_id', $kelas->id], ['status', true]])
                 ->orderBy('nama_lengkap', 'ASC')
@@ -207,17 +220,6 @@ class   LaporanLaporanDaerahController extends Controller
                     $col++;
                 }
 
-                $jadwal = Jadwal::where([['divisi_id', $request['divisi_id']], ['status', true]])
-                    ->pluck('hari');
-
-                $hariLibur = HariLibur::where([['divisi_id', $request['divisi_id']], ['status', true]])
-                    ->pluck('tanggal');
-
-                $listTanggal = Tanggal::where([['tahun', $request['tahun']], ['bulan', $request['bulan']], ['status', true]])
-                    ->whereIn('hari', $jadwal)
-                    ->whereNotIn('tanggal', $hariLibur)
-                    ->orderBy('tanggal', 'ASC')->pluck('tanggal')->toArray();
-
                 $listAbsensi = Absensi::where([['murid_id', $murid->id], ['kelas_id', $kelas->id]])
                     ->whereIn('tanggal', $listTanggal);
 
@@ -228,13 +230,12 @@ class   LaporanLaporanDaerahController extends Controller
                     ')
                     ->first();
 
-                $hadir = $absensiCount->hadir;
-                $izin  = $absensiCount->izin;
-                $alfa  = $absensiCount->alfa;
-                $total = count($listTanggal);
+                $hadir = (int)($absensiCount->hadir ?? 0);
+                $izin  = (int)($absensiCount->izin ?? 0);
+                $alfa  = (int)($absensiCount->alfa ?? 0);
 
-                $hadirPers = ($hadir/$total)*100;
-                $hadirIzinPers = (($hadir+$izin)/$total)*100;
+                $hadirPers = $total > 0 ? round(($hadir / $total) * 100, 2) : 0;
+                $hadirIzinPers = $total > 0 ? round((($hadir + $izin) / $total) * 100, 2) : 0;
 
                 $sheet->setCellValueExplicitByColumnAndRow($col, $row, (int)$hadir, DataType::TYPE_NUMERIC);
                 $sheet->getColumnDimension($sheet->getCell($sheet->getCellByColumnAndRow($col, $row)->getCoordinate())->getColumn())->setAutoSize(true);
