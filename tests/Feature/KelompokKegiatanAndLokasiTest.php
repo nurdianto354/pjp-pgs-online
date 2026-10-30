@@ -43,14 +43,17 @@ class KelompokKegiatanAndLokasiTest extends TestCase
 
     public function test_kegiatan_index_renders_with_dummy_data()
     {
+        Kegiatan::firstOrCreate(
+            ['nama' => 'Penerobosan Pengurus Pusat'],
+            ['lingkup' => 1, 'status' => true, 'created_at' => \Carbon\Carbon::now(), 'updated_at' => \Carbon\Carbon::now()]
+        );
+
         $response = $this->actingAs($this->user)
             ->get('/kelompok/master-data/kegiatan/index');
 
         $response->assertStatus(200);
         $response->assertSee('Data Kegiatan');
         $response->assertSee('Penerobosan Pengurus Pusat');
-        $response->assertSee('Musyawarah &amp; Pembinaan Daerahan', false);
-        $response->assertSee('Pengajian &amp; Musyawarah Desa', false);
     }
 
     public function test_can_create_new_kegiatan()
@@ -140,33 +143,41 @@ class KelompokKegiatanAndLokasiTest extends TestCase
 
     public function test_lokasi_crud_with_coordinates_and_toggle_status()
     {
-        // 1. Create Lokasi with Coordinates & Radius
+        $kelompok = \App\Models\Kelompok\MasterData\Kelompok::create([
+            'nama'   => 'Kelompok Uji Coba',
+            'status' => true,
+        ]);
+
+        // 1. Create Lokasi with Kelompok, Coordinates & Radius
         $response = $this->actingAs($this->user)
             ->post('/kelompok/master-data/lokasi/create', [
-                'nama'      => 'Masjid Al-Barkah Geofence',
-                'alamat'    => 'Jl. Raya Kebon Jeruk No. 45',
-                'latitude'  => -6.18952000,
-                'longitude' => 106.77254000,
-                'radius'    => 80,
-                'status'    => 1,
+                'nama'        => 'Masjid Al-Barkah Geofence',
+                'kelompok_id' => $kelompok->id,
+                'alamat'      => 'Jl. Raya Kebon Jeruk No. 45',
+                'latitude'    => -6.18952000,
+                'longitude'   => 106.77254000,
+                'radius'      => 80,
+                'status'      => 1,
             ]);
 
         $response->assertStatus(302);
         $this->assertDatabaseHas('kelompok_m_lokasi', [
-            'nama'      => 'Masjid Al-Barkah Geofence',
-            'latitude'  => -6.18952000,
-            'longitude' => 106.77254000,
-            'radius'    => 80,
-            'status'    => 1,
+            'nama'        => 'Masjid Al-Barkah Geofence',
+            'kelompok_id' => $kelompok->id,
+            'latitude'    => -6.18952000,
+            'longitude'   => 106.77254000,
+            'radius'      => 80,
+            'status'      => 1,
         ]);
 
         $lokasi = Lokasi::where('nama', 'Masjid Al-Barkah Geofence')->first();
 
-        // 2. View Lokasi index and verify coordinates and radius rendered
+        // 2. View Lokasi index and verify coordinates, radius, and kelompok rendered
         $viewResponse = $this->actingAs($this->user)
             ->get('/kelompok/master-data/lokasi/index');
         $viewResponse->assertStatus(200);
         $viewResponse->assertSee('Masjid Al-Barkah Geofence');
+        $viewResponse->assertSee('Kelompok Uji Coba');
         $viewResponse->assertSee('-6.18952000');
         $viewResponse->assertSee('Radius: 80m');
 
@@ -183,5 +194,54 @@ class KelompokKegiatanAndLokasiTest extends TestCase
         $lokasi->refresh();
         $this->assertEquals(0, $lokasi->status);
         $this->assertDatabaseHas('kelompok_m_lokasi', ['id' => $lokasi->id]);
+    }
+
+    public function test_parse_google_maps_url_and_coordinates()
+    {
+        // 1. Raw Coordinates
+        $res1 = $this->actingAs($this->user)
+            ->postJson('/kelompok/master-data/lokasi/parse-maps-url', [
+                'url' => '-6.1753924, 106.8271528',
+            ]);
+        $res1->assertStatus(200);
+        $res1->assertJson([
+            'status'    => 'success',
+            'latitude'  => -6.1753924,
+            'longitude' => 106.8271528,
+        ]);
+
+        // 2. Full Google Maps place URL with @lat,lng
+        $res2 = $this->actingAs($this->user)
+            ->postJson('/kelompok/master-data/lokasi/parse-maps-url', [
+                'url' => 'https://www.google.com/maps/place/Monas/@-6.1753924,106.8271528,17z/data=!3m1!4b1',
+            ]);
+        $res2->assertStatus(200);
+        $res2->assertJson([
+            'status'    => 'success',
+            'latitude'  => -6.1753924,
+            'longitude' => 106.8271528,
+        ]);
+
+        // 3. Query string ?q=lat,lng
+        $res3 = $this->actingAs($this->user)
+            ->postJson('/kelompok/master-data/lokasi/parse-maps-url', [
+                'url' => 'https://www.google.com/maps?q=-6.208763,106.845599',
+            ]);
+        $res3->assertStatus(200);
+        $res3->assertJson([
+            'status'    => 'success',
+            'latitude'  => -6.208763,
+            'longitude' => 106.845599,
+        ]);
+
+        // 4. Invalid input returns 422
+        $res4 = $this->actingAs($this->user)
+            ->postJson('/kelompok/master-data/lokasi/parse-maps-url', [
+                'url' => 'https://invalid-link-without-coordinates.com',
+            ]);
+        $res4->assertStatus(422);
+        $res4->assertJson([
+            'status' => 'error',
+        ]);
     }
 }

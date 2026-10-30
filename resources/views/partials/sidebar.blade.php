@@ -239,24 +239,25 @@
                                         <p>Lokasi</p>
                                     </a>
                                 </li>
-                            </ul>
-                        </li>
-                        <li class="nav-item {{ setActiveMenu('kelompok/pengajian*') }}">
-                            <a href="#" class="nav-link {{ setActive('kelompok/pengajian*') }}">
-                                <i class="nav-icon fa fa-calendar-alt"></i>
-                                <p>
-                                    Data Pengajian
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link  {{ setActive('kelompok/pengajian/jadwal/*') }}">
+                                    <a href="{{ route('kelompok.master_data.jamaah.index') }}" class="nav-link  {{ setActive('kelompok/master-data/jamaah/*') }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Jadwal</p>
+                                        <p>Personal / Jamaah</p>
                                     </a>
                                 </li>
                             </ul>
+                        </li>
+                        <li class="nav-item {{ setActiveMenu('kelompok/jadwal*') }}">
+                            <a href="{{ route('kelompok.jadwal.index') }}" class="nav-link {{ setActive('kelompok/jadwal*') }}">
+                                <i class="nav-icon fa fa-calendar-alt"></i>
+                                <p>Jadwal Kegiatan</p>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ setActiveMenu('kelompok/absensi*') }}">
+                            <a href="{{ route('kelompok.absensi.index') }}" class="nav-link {{ setActive('kelompok/absensi*') }}">
+                                <i class="nav-icon fas fa-clipboard-check"></i>
+                                <p>Absensi Kegiatan</p>
+                            </a>
                         </li>
                     </ul>
                 </li>

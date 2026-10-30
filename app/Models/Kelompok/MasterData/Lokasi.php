@@ -16,4 +16,9 @@ class Lokasi extends Model
     public $incrementing    = true;
     public $timestamps      = true;
     protected $guarded      = [];
+
+    public function getKelompok()
+    {
+        return $this->belongsTo(Kelompok::class, 'kelompok_id');
+    }
 }

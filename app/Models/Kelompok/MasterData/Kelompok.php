@@ -16,4 +16,9 @@ class Kelompok extends Model
     public $incrementing    = true;
     public $timestamps      = true;
     protected $guarded      = [];
+
+    public function getLokasi()
+    {
+        return $this->hasMany(Lokasi::class, 'kelompok_id');
+    }
 }

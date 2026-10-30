@@ -11,8 +11,10 @@ use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\Kelompok\MasterData\KegiatanController as KelompokKegiatanController;
 use App\Http\Controllers\Kelompok\MasterData\KelompokController;
 use App\Http\Controllers\Kelompok\MasterData\LokasiController;
+use App\Http\Controllers\Kelompok\MasterData\JamaahController;
 use App\Http\Controllers\Kelompok\MasterData\PengajianController;
-use App\Http\Controllers\Kelompok\Pengajian\JadwalController as PengajianJadwalController;
+use App\Http\Controllers\Kelompok\JadwalController as KelompokJadwalController;
+use App\Http\Controllers\Kelompok\AbsensiKelompokController;
 use App\Http\Controllers\KurikulumTargetController;
 use App\Http\Controllers\Laporan\LaporanLaporanDaerahController;
 use App\Http\Controllers\Laporan\LaporanLaporanKelompokController;
@@ -49,6 +51,14 @@ Auth::routes([
     'reset' => false, // Password Reset Routes...
     'verify' => false, // Email Verification Routes...
 ]);
+
+// Route Publik Presensi Kelompok (Akses Bebas Tanpa Login)
+Route::prefix('presensi-kelompok')->group(function () {
+    Route::get('{jadwal_id}', [AbsensiKelompokController::class, 'publicForm'])->name('kelompok.absensi.public_form');
+    Route::get('{jadwal_id}/jamaah', [AbsensiKelompokController::class, 'getJamaahList'])->name('kelompok.absensi.get_jamaah');
+    Route::post('{jadwal_id}/submit', [AbsensiKelompokController::class, 'publicStore'])->name('kelompok.absensi.public_store');
+    Route::get('{jadwal_id}/rekap', [AbsensiKelompokController::class, 'publicRekap'])->name('kelompok.absensi.public_rekap');
+});
 
 Route::group(['middleware' => 'auth'], function() {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -196,6 +206,13 @@ Route::group(['middleware' => 'auth'], function() {
                 Route::get('index', 'index')->name('kelompok.master_data.lokasi.index');
                 Route::post('create', 'create')->name('kelompok.master_data.lokasi.create');
                 Route::post('toggle-status/{id}', 'toggleStatus')->name('kelompok.master_data.lokasi.toggle_status');
+                Route::post('parse-maps-url', 'parseMapsUrl')->name('kelompok.master_data.lokasi.parse_maps_url');
+            });
+            Route::controller(JamaahController::class)->prefix('jamaah')->group(function () {
+                Route::get('index', 'index')->name('kelompok.master_data.jamaah.index');
+                Route::post('create', 'create')->name('kelompok.master_data.jamaah.create');
+                Route::post('toggle-status/{id}', 'toggleStatus')->name('kelompok.master_data.jamaah.toggle_status');
+                Route::post('sync', 'sync')->name('kelompok.master_data.jamaah.sync');
             });
             Route::controller(KelompokController::class)->prefix('kelompok')->group(function () {
                 Route::get('index', 'index')->name('kelompok.master_data.kelompok.index');
@@ -208,13 +225,18 @@ Route::group(['middleware' => 'auth'], function() {
                 Route::post('delete/{id}', 'destroy')->name('kelompok.master_data.pengajian.destroy');
             });
         });
-        // Route::prefix('pengajian')->group(function () {
-        //     Route::controller(PengajianJadwalController::class)->prefix('jadwal')->group(function () {
-        //         Route::get('index', 'index')->name('kelompok.pengajian.jawdal.index');
-        //         Route::post('create', 'create')->name('kelompok.pengajian.jawdal.create');
-        //         Route::post('delete/{id}', 'destroy')->name('kelompok.pengajian.jawdal.destroy');
-        //     });
-        // });
+
+        Route::controller(KelompokJadwalController::class)->prefix('jadwal')->group(function () {
+            Route::get('index', 'index')->name('kelompok.jadwal.index');
+            Route::post('create', 'create')->name('kelompok.jadwal.create');
+            Route::post('toggle-status/{id}', 'toggleStatus')->name('kelompok.jadwal.toggle_status');
+        });
+
+        Route::controller(AbsensiKelompokController::class)->prefix('absensi')->group(function () {
+            Route::get('index', 'index')->name('kelompok.absensi.index');
+            Route::get('detail/{jadwal_id}', 'detail')->name('kelompok.absensi.detail');
+            Route::post('delete/{id}', 'destroy')->name('kelompok.absensi.destroy');
+        });
     });
 
     Route::prefix('master-user')->group(function () {
