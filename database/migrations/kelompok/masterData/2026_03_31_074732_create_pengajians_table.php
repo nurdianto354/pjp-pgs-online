@@ -13,13 +13,15 @@ class CreatePengajiansTable extends Migration
      */
     public function up()
     {
-        Schema::create('kelompok_m_pengajian', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama');
-            $table->string('tipe');
-            $table->boolean('status');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('kelompok_m_pengajian')) {
+            Schema::create('kelompok_m_pengajian', function (Blueprint $table) {
+                $table->id();
+                $table->string('nama');
+                $table->string('tipe');
+                $table->boolean('status');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

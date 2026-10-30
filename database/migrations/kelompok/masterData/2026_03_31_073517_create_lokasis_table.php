@@ -13,13 +13,15 @@ class CreateLokasisTable extends Migration
      */
     public function up()
     {
-        Schema::create('kelompok_m_lokasi', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama');
-            $table->string('alamat')->nullable();
-            $table->boolean('status');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('kelompok_m_lokasi')) {
+            Schema::create('kelompok_m_lokasi', function (Blueprint $table) {
+                $table->id();
+                $table->string('nama');
+                $table->string('alamat')->nullable();
+                $table->boolean('status');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -28,11 +28,15 @@
     }
     #searchResultsList {
         position: absolute;
+        top: 100%;
+        left: 0;
         width: 100%;
-        z-index: 1055;
-        max-height: 220px;
+        z-index: 1060;
+        max-height: 240px;
         overflow-y: auto;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        border-radius: 6px;
+        margin-top: 2px;
     }
     #searchResultsList .list-group-item:hover {
         background-color: #f8f9fa;
@@ -284,7 +288,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
                             </div>
-                            <input type="text" class="form-control" id="searchLocationInput" placeholder="Cari nama tempat, masjid, kelurahan, atau jalan di Google Maps...">
+                            <input type="text" class="form-control" id="searchLocationInput" placeholder="Ketik nama tempat, masjid, kelurahan, atau jalan, lalu tekan Enter / Cari Lokasi...">
                             @if(empty($googleMapsKey))
                                 <div class="input-group-append">
                                     <button class="btn btn-primary" type="button" id="btnSearchLocation">
@@ -766,6 +770,106 @@
         toastMixin.fire({
             icon: 'success',
             title: 'Titik lokasi Google Maps berhasil diterapkan ke peta!'
+        });
+    }
+
+    // =========================================================================
+    // PENCARIAN TEMPAT DENGAN OPENSTREETMAP NOMINATIM (MODE NON-GOOGLE API)
+    // =========================================================================
+    $('#btnSearchLocation').on('click', function (e) {
+        e.preventDefault();
+        const keyword = $('#searchLocationInput').val().trim();
+        searchLocationOsm(keyword);
+    });
+
+    $('#searchLocationInput').on('keydown', function (e) {
+        if (e.which === 13) {
+            e.preventDefault(); // Mencegah submit modal form
+            if (!isGoogleMaps) {
+                const keyword = $(this).val().trim();
+                searchLocationOsm(keyword);
+            }
+        }
+    });
+
+    function searchLocationOsm(keyword) {
+        if (!keyword || keyword.length < 3) {
+            toastMixin.fire({
+                icon: 'warning',
+                title: 'Ketik minimal 3 karakter nama tempat atau jalan untuk mencari.'
+            });
+            $('#searchLocationInput').focus();
+            return;
+        }
+
+        const $btn = $('#btnSearchLocation');
+        const $list = $('#searchResultsList');
+
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Mencari...');
+        $list.empty().show().html(`
+            <div class="list-group-item list-group-item-action text-muted small py-2">
+                <i class="fas fa-spinner fa-spin mr-1 text-primary"></i> Sedang mencari "${keyword}" di peta...
+            </div>
+        `);
+
+        // Panggil Nominatim Geocoding API (OpenStreetMap) dengan batas Indonesia
+        fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(keyword) + '&countrycodes=id&limit=5', {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            $btn.prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Cari Lokasi');
+            $list.empty();
+
+            if (!data || data.length === 0) {
+                $list.html(`
+                    <div class="list-group-item list-group-item-action text-muted small py-2">
+                        <i class="fas fa-exclamation-circle text-warning mr-1"></i> Lokasi tidak ditemukan. Coba gunakan nama jalan/kelurahan/daerah lain.
+                    </div>
+                `);
+                return;
+            }
+
+            data.forEach(function (place) {
+                const lat = parseFloat(place.lat);
+                const lon = parseFloat(place.lon);
+                const displayName = place.display_name;
+
+                const $item = $(`
+                    <a href="javascript:void(0)" class="list-group-item list-group-item-action py-2 px-3 search-result-item" style="border-left: 3px solid #28a745;">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-map-marker-alt text-danger mr-2 mt-1"></i>
+                            <div>
+                                <div class="font-weight-bold text-dark small">${displayName.split(',')[0]}</div>
+                                <div class="text-muted small" style="font-size: 11px; line-height: 1.3;">${displayName}</div>
+                            </div>
+                        </div>
+                    </a>
+                `);
+
+                $item.on('click', function (e) {
+                    e.preventDefault();
+                    $list.hide().empty();
+                    applyExtractedCoordinates(lat, lon);
+                    $('#alamat').val(displayName);
+                    toastMixin.fire({
+                        icon: 'success',
+                        title: 'Lokasi berhasil dipilih dan diterapkan ke peta!'
+                    });
+                });
+
+                $list.append($item);
+            });
+        })
+        .catch(err => {
+            $btn.prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Cari Lokasi');
+            $list.html(`
+                <div class="list-group-item list-group-item-action text-danger small py-2">
+                    <i class="fas fa-exclamation-triangle mr-1"></i> Terjadi gangguan koneksi saat mencari lokasi. Silakan coba kembali.
+                </div>
+            `);
         });
     }
 
