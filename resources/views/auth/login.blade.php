@@ -606,7 +606,7 @@
             // Loading state saat tombol masuk diklik
             $('#loginForm').on('submit', function () {
                 const btn = $('#btnSubmitLogin');
-                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Memvalidasi Akun...');
+                btn.html('<i class="fas fa-spinner fa-spin mr-2"></i> Memvalidasi Akun...').css('pointer-events', 'none');
             });
         });
     </script>

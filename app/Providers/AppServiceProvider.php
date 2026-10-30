@@ -29,7 +29,9 @@ class AppServiceProvider extends ServiceProvider
             $this->loadMigrationsFrom(database_path('migrations/kelompok/masterData'));
         }
 
-        if (str_contains(request()->header('host'), 'loca.lt')) {
+        // Paksa skema HTTPS pada production, reverse proxy, atau domain live
+        $host = request()->header('host') ?? '';
+        if (app()->environment('production') || str_contains($host, 'pgsdua.web.id') || str_contains($host, 'loca.lt') || request()->isSecure()) {
             URL::forceScheme('https');
         }
     }
