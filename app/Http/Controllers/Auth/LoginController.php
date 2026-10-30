@@ -37,4 +37,32 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
+    /**
+     * Override method login untuk diagnosa langsung di browser.
+     */
+    public function login(\Illuminate\Http\Request $request)
+    {
+        $this->validateLogin($request);
+
+        $username = $request->input($this->username());
+        $password = $request->input('password');
+
+        $user = \App\Models\User::where($this->username(), $username)->first();
+        $isPasswordMatch = $user ? \Illuminate\Support\Facades\Hash::check($password, $user->password) : false;
+        $attempt = $this->attemptLogin($request);
+
+        // Langsung tampilkan hasil evaluasi otentikasi di layar browser
+        dd([
+            'DIAGNOSA LOGIN' => [
+                '1. Status Auth Attempt' => $attempt ? 'BERHASIL LOGIN' : 'GAGAL LOGIN (Kredensial Ditolak)',
+                '2. Username Diinput'   => $username,
+                '3. User Ditemukan di DB'=> $user ? 'YA (ID: ' . $user->id . ')' : 'TIDAK DITEMUKAN',
+                '4. Password Cocok'      => $isPasswordMatch ? 'COCOK' : 'TIDAK COCOK',
+                '5. Target Redirect URL' => redirect()->intended($this->redirectPath())->getTargetUrl(),
+                '6. Session ID Aktif'    => session()->getId(),
+                '7. Driver Session'      => config('session.driver'),
+            ]
+        ]);
+    }
 }
