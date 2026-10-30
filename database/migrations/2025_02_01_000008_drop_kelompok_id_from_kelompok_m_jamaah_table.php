@@ -13,11 +13,22 @@ return new class extends Migration
      */
     public function up()
     {
-        if (Schema::hasTable('kelompok_m_jamaah') && Schema::hasColumn('kelompok_m_jamaah', 'kelompok_id')) {
-            Schema::table('kelompok_m_jamaah', function (Blueprint $table) {
-                $table->dropForeign(['kelompok_id']);
-                $table->dropColumn('kelompok_id');
-            });
+        if (Schema::hasTable('kelompok_m_jamaah')) {
+            // Coba drop foreign key jika ada, abaikan jika tidak ada di database
+            try {
+                Schema::table('kelompok_m_jamaah', function (Blueprint $table) {
+                    $table->dropForeign(['kelompok_id']);
+                });
+            } catch (\Throwable $th) {
+                // Foreign key tidak ada di database, lewati
+            }
+
+            // Drop kolom kelompok_id jika masih ada
+            if (Schema::hasColumn('kelompok_m_jamaah', 'kelompok_id')) {
+                Schema::table('kelompok_m_jamaah', function (Blueprint $table) {
+                    $table->dropColumn('kelompok_id');
+                });
+            }
         }
     }
 
