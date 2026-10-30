@@ -43,6 +43,17 @@ class LoginController extends Controller
      */
     public function login(\Illuminate\Http\Request $request)
     {
+        // 1. CEK APAKAH DATA DARI FORM SAMPAI KE SERVER
+        dd([
+            'CEK PAYLOAD DARI BROWSER' => [
+                'Method_Request' => $request->method(),
+                'Is_Secure_HTTPS' => $request->isSecure() ? 'YA (HTTPS)' : 'TIDAK (Masih HTTP)',
+                'URL_Tujuan_Form' => $request->fullUrl(),
+                'Headers_Content_Type' => $request->header('Content-Type'),
+                'Semua_Input_Diterima' => $request->all(),
+            ]
+        ]);
+
         $this->validateLogin($request);
 
         $username = $request->input($this->username());
