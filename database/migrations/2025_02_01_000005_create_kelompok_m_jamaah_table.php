@@ -24,9 +24,15 @@ return new class extends Migration
                 $table->boolean('status')->default(true);
                 $table->timestamps();
 
-                $table->foreign('kelompok_id')->references('id')->on('kelompok_m_kelompok')->onDelete('set null');
-                $table->foreign('murid_id')->references('id')->on('murid')->onDelete('set null');
-                $table->foreign('divisi_id')->references('id')->on('m_divisi')->onDelete('set null');
+                if (Schema::hasTable('kelompok_m_kelompok')) {
+                    $table->foreign('kelompok_id')->references('id')->on('kelompok_m_kelompok')->onDelete('set null');
+                }
+                if (Schema::hasTable('murid')) {
+                    $table->foreign('murid_id')->references('id')->on('murid')->onDelete('set null');
+                }
+                if (Schema::hasTable('m_divisi')) {
+                    $table->foreign('divisi_id')->references('id')->on('m_divisi')->onDelete('set null');
+                }
             });
         }
     }

@@ -13,11 +13,13 @@ class AddKelompokIdToKelompokMLokasiTable extends Migration
      */
     public function up()
     {
-        Schema::table('kelompok_m_lokasi', function (Blueprint $table) {
-            if (!Schema::hasColumn('kelompok_m_lokasi', 'kelompok_id')) {
-                $table->unsignedBigInteger('kelompok_id')->nullable()->after('id');
-            }
-        });
+        if (Schema::hasTable('kelompok_m_lokasi')) {
+            Schema::table('kelompok_m_lokasi', function (Blueprint $table) {
+                if (!Schema::hasColumn('kelompok_m_lokasi', 'kelompok_id')) {
+                    $table->unsignedBigInteger('kelompok_id')->nullable()->after('id');
+                }
+            });
+        }
     }
 
     /**

@@ -26,8 +26,12 @@ return new class extends Migration
                 $table->boolean('status')->default(true);
                 $table->timestamps();
 
-                $table->foreign('kegiatan_id')->references('id')->on('kelompok_m_kegiatan')->onDelete('cascade');
-                $table->foreign('kelompok_id')->references('id')->on('kelompok_m_kelompok')->onDelete('set null');
+                if (Schema::hasTable('kelompok_m_kegiatan')) {
+                    $table->foreign('kegiatan_id')->references('id')->on('kelompok_m_kegiatan')->onDelete('cascade');
+                }
+                if (Schema::hasTable('kelompok_m_kelompok')) {
+                    $table->foreign('kelompok_id')->references('id')->on('kelompok_m_kelompok')->onDelete('set null');
+                }
             });
         }
 
