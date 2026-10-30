@@ -37,4 +37,14 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
+    /**
+     * Tentukan field input yang digunakan untuk autentikasi (username, bukan email).
+     *
+     * @return string
+     */
+    public function username()
+    {
+        return 'username';
+    }
 }
