@@ -43,7 +43,6 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->foreign('jadwal_id')->references('id')->on('kelompok_jadwal')->onDelete('cascade');
-                $table->foreign('lokasi_id')->references('id')->on('kelompok_m_lokasi')->onDelete('cascade');
             });
         }
     }

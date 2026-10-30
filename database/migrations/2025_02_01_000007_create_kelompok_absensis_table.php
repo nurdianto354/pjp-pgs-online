@@ -30,7 +30,6 @@ return new class extends Migration
 
                 $table->foreign('jadwal_id')->references('id')->on('kelompok_jadwal')->onDelete('cascade');
                 $table->foreign('jamaah_id')->references('id')->on('kelompok_m_jamaah')->onDelete('cascade');
-                $table->foreign('lokasi_id')->references('id')->on('kelompok_m_lokasi')->onDelete('set null');
 
                 $table->unique(['jadwal_id', 'jamaah_id'], 'unique_jadwal_jamaah_presensi');
             });
