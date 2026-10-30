@@ -499,6 +499,16 @@
                     </div>
                 @endif
 
+                @if ($errors->any())
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 12px;">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Gagal Masuk:</strong> {{ $errors->first() }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('login') }}" id="loginForm">
                     @csrf
 
