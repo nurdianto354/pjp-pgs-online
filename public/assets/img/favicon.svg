@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="pjpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f5132"/>
+      <stop offset="50%" stop-color="#1e7e34"/>
+      <stop offset="100%" stop-color="#28a745"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect width="128" height="128" rx="28" fill="url(#pjpGrad)" filter="url(#shadow)"/>
+
+  <!-- Golden / White Crescent Moon & Star on Top -->
+  <path d="M 64 16 A 6 6 0 0 0 66 28 A 7 7 0 1 1 64 16 Z" fill="#ffd700"/>
+  <circle cx="68" cy="20" r="1.5" fill="#ffd700"/>
+
+  <!-- Mosque Dome -->
+  <path d="M 64 26 C 58 35, 42 46, 42 66 L 86 66 C 86 46, 70 35, 64 26 Z" fill="#ffffff"/>
+
+  <!-- Left Minaret -->
+  <rect x="26" y="44" width="10" height="48" rx="2" fill="#ffffff" opacity="0.95"/>
+  <path d="M 26 44 L 31 34 L 36 44 Z" fill="#ffffff"/>
+  <circle cx="31" cy="33" r="1.5" fill="#ffd700"/>
+
+  <!-- Right Minaret -->
+  <rect x="92" y="44" width="10" height="48" rx="2" fill="#ffffff" opacity="0.95"/>
+  <path d="M 92 44 L 97 34 L 102 44 Z" fill="#ffffff"/>
+  <circle cx="97" cy="33" r="1.5" fill="#ffd700"/>
+
+  <!-- Mosque Main Body -->
+  <rect x="36" y="66" width="56" height="34" fill="#ffffff"/>
+
+  <!-- Arched Main Door -->
+  <path d="M 54 100 L 54 82 C 54 75, 74 75, 74 82 L 74 100 Z" fill="#1e7e34"/>
+
+  <!-- Left Arched Window -->
+  <path d="M 42 90 L 42 78 C 42 74, 48 74, 48 78 L 48 90 Z" fill="#1e7e34" opacity="0.7"/>
+
+  <!-- Right Arched Window -->
+  <path d="M 80 90 L 80 78 C 80 74, 86 74, 86 78 L 86 90 Z" fill="#1e7e34" opacity="0.7"/>
+
+  <!-- Base Foundation -->
+  <rect x="20" y="99" width="88" height="6" rx="3" fill="#ffffff" opacity="0.9"/>
+  <rect x="16" y="105" width="96" height="5" rx="2.5" fill="#ffd700"/>
+</svg>
+
